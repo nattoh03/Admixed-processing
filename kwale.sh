@@ -1,6 +1,6 @@
 !/bin/bash
 
-#SBATCH --job-name=SRA_dl
+#SBATCH --job-name=SRA_Kwale
 
 #SBATCH --output=dl_%j.log
 
