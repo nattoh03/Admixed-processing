@@ -1,6 +1,6 @@
 !/bin/bash
 
-#SBATCH --job-name=SRA_dl
+#SBATCH --job-name=SRA_shimbahills
 
 #SBATCH --output=dl_%j.log
 
