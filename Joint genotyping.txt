@@ -1,0 +1,56 @@
+Joint genotyping
+#Generate your sample map (if you haven't yet):
+
+ls -1 $PWD/*.g.vcf.gz | while read line; do 
+    name=$(basename $line .g.vcf.gz)
+    echo -e "$name\t$line"
+done > rabai_sample_map.txt
+
+
+
+#!/bin/bash
+
+# Define the genomic intervals (The three main chromosomes)
+# Note: We include the unplaced scaffold NW_018736656.1 in the Chr1 job
+INT1="NC_035107.1 -L NW_018736656.1"
+INT2="NC_035108.1"
+INT3="NC_035109.1"
+
+INTERVALS=("$INT1" "$INT2" "$INT3")
+NAMES=("Chr1_plus" "Chr2" "Chr3")
+
+for i in "${!INTERVALS[@]}"; do
+    CHR_NAME=${NAMES[$i]}
+    CHR_INT=${INTERVALS[$i]}
+    
+    sbatch <<EOT
+#!/bin/bash
+#SBATCH --job-name=db_import_$CHR_NAME
+#SBATCH --partition=day
+#SBATCH --qos=normal
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=64G
+#SBATCH --time=24:00:00
+#SBATCH --output=db_import_$CHR_NAME.log
+#SBATCH --array=0-34
+
+
+# Using the version detected in your previous error logs
+module load GATK/4.6.2.0-GCCcore-13.3.0-Java-17
+
+# The workspace path must not exist before running, 
+# or use the --overwrite-existing-genomicsdb-workspace flag
+gatk --java-options "-Xmx48g -Xms48g" GenomicsDBImport \
+    --genomicsdb-workspace-path /home/gi64/palmer_scratch/admixed_reads/gvcf_rabai_files/db_$CHR_NAME \
+    --sample-name-map /home/gi64/palmer_scratch/admixed_reads/gvcf_rabai_files/rabai_sample_map.txt \
+    -L $CHR_INT \
+    --batch-size 50 \
+    --reader-threads 4 \
+    --overwrite-existing-genomicsdb-workspace true
+EOT
+done
+
+
+
