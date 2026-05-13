@@ -6,7 +6,7 @@
 
 #SBATCH --qos=normal
 
-#SBATCH --array=0-18
+#SBATCH --array=0-18  #for 19 samples
 
 #SBATCH --nodes=1
 
@@ -58,7 +58,7 @@ mkdir -p logs
 
 # We use an absolute path here as well to avoid array mapping issues
 
-SAMPLES=($(ls $HOME/palmer_scratch/admixed_reads/aligned/*_final.bam))
+SAMPLES=($(ls $HOME/palmer_scratch/admixed_reads/aligned/*_final.bam)) #final.bam files have been processed for markduplicates
 
 CURRENT_BAM=${SAMPLES[$SLURM_ARRAY_TASK_ID]}
 
